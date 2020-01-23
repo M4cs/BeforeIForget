@@ -41,9 +41,12 @@ class BIF(object):
         if datetime.datetime.now() >= self.until:
             self.should_run = False
         while self.should_run:
-            with open(CURRENT_DIRECTORY + '/bif.log', 'w') as log:
-                log.write('FAILED TO COMMIT {}'.format(datetime.datetime.now()))
-            self.g.execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
+            time.sleep(self.interval)
+            try:
+                self.g.execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
+            except:
+                with open(CURRENT_DIRECTORY + '/bif.log', 'a') as log:
+                    log.write('FAILED TO COMMIT {}'.format(datetime.datetime.now()))
 
 parser = argparse.ArgumentParser(usage="bif 5m 2h")
 parser.add_argument('interval', help='Interval to run "commit -am" on the local Repo')
