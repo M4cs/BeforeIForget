@@ -17,8 +17,7 @@ class BIF(object):
             self.until = datetime.datetime.now() + datetime.timedelta(minutes=int(time_int))
         elif time_type == "s":
             self.until = datetime.datetime.now() + datetime.timedelta(seconds=int(time_int))
-        print(datetime.datetime.now())
-        print(self.until)
+        print('Running BIF until {}'.format(self.until))
         interval_split = re.split(reg, interval)
         interval_time = interval_split[1]
         interval_type = interval_split[2]
@@ -28,7 +27,7 @@ class BIF(object):
             self.interval = datetime.timedelta(minutes=int(interval_time)).total_seconds()
         else:
             self.interval = int(interval_time)
-        print(self.interval)
+        print('BIF Will Commit Every {} seconds'.format(self.interval))
         self.g = Git(self.cwd)
         self.length = length
         self.should_run = True
@@ -37,16 +36,17 @@ class BIF(object):
         self.run()
 
     def run(self):
-        if datetime.datetime.now() >= self.until:
-            self.should_run = False
-        while self.should_run:
+        while True:
             time.sleep(self.interval)
-            try:
-                print('[{}] BIF Committing'.format(datetime.datetime.now()))
-                self.g.execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
-            except Exception as e:
-                with open(CURRENT_DIRECTORY + '/bif.log', 'a') as log:
-                    log.write('FAILED TO COMMIT {}: ERROR {}\n'.format(datetime.datetime.now(), e))
+            if datetime.datetime.now() >= self.until:
+                self.should_run = False
+            if self.should_run:
+                try:
+                    print('[{}] BIF Committing'.format(datetime.datetime.now()))
+                    self.g.execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
+                except Exception as e:
+                    with open(CURRENT_DIRECTORY + '/bif.log', 'a') as log:
+                        log.write('FAILED TO COMMIT {}: ERROR {}\n'.format(datetime.datetime.now(), e))
 
 parser = argparse.ArgumentParser(usage="bif 5m 2h")
 parser.add_argument('interval', help='Interval to run "commit -am" on the local Repo')
