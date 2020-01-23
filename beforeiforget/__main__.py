@@ -68,3 +68,5 @@ if __name__ == "__main__":
     else:
         show = True
     bif = BIF(args.interval, args.totaltime, should_notify=show)
+    
+    
