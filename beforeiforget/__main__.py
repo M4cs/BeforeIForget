@@ -43,7 +43,7 @@ class BIF(object):
             if self.should_run:
                 try:
                     print('[{}] BIF Committing'.format(datetime.datetime.now()))
-                    self.g.execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
+                    self.g.execute(command=['git', 'commit', '-am', 'Auto-Commit from BIF @ {} UTC'.format(datetime.datetime.now())])
                 except Exception as e:
                     with open(CURRENT_DIRECTORY + '/bif.log', 'a') as log:
                         log.write('FAILED TO COMMIT {}: ERROR {}\n'.format(datetime.datetime.now(), e))
