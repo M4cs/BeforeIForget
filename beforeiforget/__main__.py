@@ -34,8 +34,7 @@ class BIF(object):
         self.should_run = True
         self.should_skip = False
         self.should_notify = should_notify
-        t = Thread(target=self.run, args=())
-        t.start()
+        self.run()
 
     def run(self):
         if datetime.datetime.now() >= self.until:
@@ -43,10 +42,11 @@ class BIF(object):
         while self.should_run:
             time.sleep(self.interval)
             try:
+                print('Committing')
                 self.g.execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
-            except:
+            except Exception as e:
                 with open(CURRENT_DIRECTORY + '/bif.log', 'a') as log:
-                    log.write('FAILED TO COMMIT {}'.format(datetime.datetime.now()))
+                    log.write('FAILED TO COMMIT {}: ERROR {}\n'.format(datetime.datetime.now(), e))
 
 parser = argparse.ArgumentParser(usage="bif 5m 2h")
 parser.add_argument('interval', help='Interval to run "commit -am" on the local Repo')
@@ -62,4 +62,9 @@ def main():
     bif = BIF(args.interval, args.totaltime, should_notify=show)
     
 if __name__ == "__main__":
-    main()
+    args = parser.parse_args()
+    if args.disable_notif:
+        show = False
+    else:
+        show = True
+    bif = BIF(args.interval, args.totaltime, should_notify=show)
