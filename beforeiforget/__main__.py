@@ -42,7 +42,7 @@ class BIF(object):
         while self.should_run:
             time.sleep(self.interval)
             try:
-                print('Committing')
+                print('[{}] BIF Committing'.format(datetime.datetime.now()))
                 self.g.execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
             except Exception as e:
                 with open(CURRENT_DIRECTORY + '/bif.log', 'a') as log:
