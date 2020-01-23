@@ -1,7 +1,7 @@
 from git.cmd import Git
 from beforeiforget import CURRENT_DIRECTORY
 from threading import Thread
-import time, datetime, re, ptoaster, argparse
+import time, datetime, re, argparse
 
 class BIF(object):
     def __init__(self, interval, length, should_notify=True):
@@ -36,17 +36,21 @@ class BIF(object):
         self.run()
 
     def run(self):
-        while True:
-            time.sleep(self.interval)
-            if datetime.datetime.now() >= self.until:
-                self.should_run = False
-            if self.should_run:
-                try:
-                    print('[{}] BIF Committing'.format(datetime.datetime.now()))
-                    self.g.execute(command=['git', 'commit', '-am', 'Auto-Commit from BIF @ {} UTC'.format(datetime.datetime.now())])
-                except Exception as e:
-                    with open(CURRENT_DIRECTORY + '/bif.log', 'a') as log:
-                        log.write('FAILED TO COMMIT {}: ERROR {}\n'.format(datetime.datetime.now(), e))
+        try:
+            while True:
+                time.sleep(self.interval)
+                if datetime.datetime.now() >= self.until:
+                    break
+                
+                if self.should_run:
+                    try:
+                        print('[{}] BIF Committing'.format(datetime.datetime.now()))
+                        self.g.execute(command=['git', 'commit', '-am', 'Auto-Commit from BIF @ {} UTC'.format(datetime.datetime.now())])
+                    except Exception as e:
+                        with open(CURRENT_DIRECTORY + '/bif.log', 'a') as log:
+                            log.write('FAILED TO COMMIT {}: ERROR {}\n'.format(datetime.datetime.now(), e))
+        except KeyboardInterrupt:
+            print('Exiting...')
 
 parser = argparse.ArgumentParser(usage="bif 5m 2h")
 parser.add_argument('interval', help='Interval to run "commit -am" on the local Repo')
@@ -62,9 +66,4 @@ def main():
     bif = BIF(args.interval, args.totaltime, should_notify=show)
     
 if __name__ == "__main__":
-    args = parser.parse_args()
-    if args.disable_notif:
-        show = False
-    else:
-        show = True
-    bif = BIF(args.interval, args.totaltime, should_notify=show)
+    main()
