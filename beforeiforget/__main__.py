@@ -34,21 +34,16 @@ class BIF(object):
         self.should_run = True
         self.should_skip = False
         self.should_notify = should_notify
-        t = Thread(target=self.run)
-        t.daemon = True
+        t = Thread(target=self.run, args=())
         t.start()
 
     def run(self):
         if datetime.datetime.now() >= self.until:
             self.should_run = False
         while self.should_run:
-            time.sleep(self.interval)
-            try:
-                self.g.execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
-                if self.should_notify:
-                    ptoaster.notify('BIF Notifier', 'BIF just commit to the local repo at {}'.format(CURRENT_DIRECTORY), fade_in_duration=500, icon=None)
-            except:
-                ptoaster.notify('BIF Notifier', 'Commit Failed at local repo {}'.format(CURRENT_DIRECTORY), fade_in_duration=500, icon=None)
+            with open(CURRENT_DIRECTORY + '/bif.log', 'w') as log:
+                log.write('FAILED TO COMMIT {}'.format(datetime.datetime.now()))
+            self.g.execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
 
 parser = argparse.ArgumentParser(usage="bif 5m 2h")
 parser.add_argument('interval', help='Interval to run "commit -am" on the local Repo')
@@ -64,5 +59,4 @@ def main():
     bif = BIF(args.interval, args.totaltime, should_notify=show)
     
 if __name__ == "__main__":
-    Git(CURRENT_DIRECTORY).execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
     main()
