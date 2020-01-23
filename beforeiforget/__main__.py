@@ -55,7 +55,12 @@ parser.add_argument('-dn', '--disable-notif', help='Disables Notifications')
                 
 def main():
     args = parser.parse_args()
-    bif = BIF(args.interval, args.totaltime, should_notify=args.disable_notif)
+    if args.disable_notif:
+        show = False
+    else:
+        show = True
+    bif = BIF(args.interval, args.totaltime, should_notify=show)
     
 if __name__ == "__main__":
+    Git(CURRENT_DIRECTORY).execute(command=['git', 'commit', '-am', '"Auto-Commit from BIF @ {} UTC"'.format(datetime.datetime.now())])
     main()
